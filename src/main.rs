@@ -10,8 +10,6 @@ use skin_detection_server::mqtt::mqtt_server;
 
 #[tokio::main]
 async fn main() {
-    // mqtt_server();
-    // http_server();
     let (first, second) = tokio::join!(
         mqtt_server(),
         http_server()
