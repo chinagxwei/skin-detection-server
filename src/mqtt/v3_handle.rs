@@ -12,7 +12,7 @@ use crate::mqtt::message::v3::{
     SubackMessage
 };
 use crate::mqtt::tools::protocol::MqttQos;
-use crate::mqtt::SUBSCRIPT;
+use crate::SUBSCRIPT;
 
 pub async fn match_v3_data(line: &mut Line, base_msg: BaseMessage) -> Option<MqttMessageKind> {
     if let Some(v3) = MqttMessageKind::v3(base_msg) {

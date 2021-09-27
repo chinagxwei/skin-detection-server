@@ -429,6 +429,17 @@ impl PublishMessage {
         msg.bytes = Some(v3_packet::publish(&msg));
         msg
     }
+
+    pub fn simple_new_msg(topic: String, message_id: u16, message_body: String) -> PublishMessage {
+        PublishMessage::new(
+            MqttQos::Qos1,
+            MqttDup::Disable,
+            MqttRetain::Disable,
+            topic,
+            message_id,
+            message_body,
+        )
+    }
 }
 
 #[derive(Debug, Clone)]
