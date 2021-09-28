@@ -127,14 +127,14 @@ async fn machine_login(Query(payload): Query<MachineLogin>) -> impl IntoResponse
     broadcast(entity).await
 }
 
-async fn broadcast(msg: MachineMessage) -> (StatusCode, Json<SimpleDataResult>) {
-    let topic = format!("{}-topic", msg.id.clone());
-    let msg = v3::PublishMessage::simple_new_msg(
+async fn broadcast(machine_message: MachineMessage) -> (StatusCode, Json<SimpleDataResult>) {
+    let topic = format!("{}-topic", machine_message.id.clone());
+    let publish_message = v3::PublishMessage::simple_new_msg(
         topic,
         0,
-        serde_json::to_string(&msg).unwrap(),
+        serde_json::to_string(&machine_message).unwrap(),
     );
-    let topic_msg = TopicMessage::ContentV3(ClientID("idreamspace-server".to_string()), msg);
+    let topic_msg = TopicMessage::ContentV3(ClientID("idreamspace-server".to_string()), publish_message);
     if let Some(topic) = topic_msg.get_topic() {
         SUBSCRIPT.broadcast(topic, &topic_msg).await;
     }
