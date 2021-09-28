@@ -3,7 +3,7 @@ use crate::mqtt::tools::un_pack_tool::{get_type, get_protocol_name_and_version};
 use crate::mqtt::message::v3::{
     ConnackMessage, ConnectMessage, DisconnectMessage, MqttMessageV3,
     PubackMessage, PubcompMessage, PublishMessage, PubrecMessage, PubrelMessage,
-    UnsubackMessage
+    UnsubackMessage,
 };
 use crate::mqtt::tools::protocol::{MqttProtocolLevel, MqttDup, MqttQos, MqttRetain};
 use crate::mqtt::hex::PropertyItem;
@@ -316,5 +316,35 @@ impl Default for PingrespMessage {
             msg_type: TypeKind::PINGRESP,
             bytes: pack_header(TypeKind::PINGRESP, 0),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test() {
+        let binary: [u8; 98] = [
+            50, 96, 0, 20, 109, 113,
+            116, 116, 120, 95, 48, 56,
+            99, 57, 97, 100, 98, 98,
+            45, 116, 111, 112, 105,
+            99, 0, 0, 123, 34, 105,
+            100, 34, 58, 34, 109, 113,
+            116, 116, 120, 95, 48, 56,
+            99, 57, 97, 100, 98, 98,
+            34, 44, 34, 101, 118,
+            101, 110, 116, 34, 58,
+            34, 83, 101, 116, 81,
+            114, 99, 111, 100, 101,
+            34, 44, 34, 100, 97, 116,
+            97, 34, 58, 34, 104, 116,
+            116, 112, 115, 58, 47, 47,
+            99, 110, 46, 98, 105, 110,
+            103, 46, 99, 111, 109, 34, 125];
+        let base_msg: BaseMessage = biny.as_ref().into();
+        let msg: PublishMessage = base_msg.into();
+        println!("{:?}", msg);
     }
 }

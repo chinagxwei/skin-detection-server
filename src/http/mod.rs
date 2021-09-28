@@ -114,6 +114,7 @@ async fn get_machines() -> impl IntoResponse {
 ///
 async fn set_machine_qrcode(Query(payload): Query<MachineQrcode>) -> impl IntoResponse {
     let entity = MachineMessage::from(payload);
+
     broadcast(entity).await
 }
 

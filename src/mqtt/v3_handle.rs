@@ -75,6 +75,8 @@ async fn handle_v3_publish(line: &mut Line, msg: &PublishMessage) -> Option<Mqtt
     SUBSCRIPT.broadcast(&msg.topic, &topic_msg).await;
     if msg.qos == MqttQos::Qos1 {
         return Some(MqttMessageV3::Puback(PubackMessage::new(msg.message_id)));
+    }else if msg.qos == MqttQos::Qos2 {
+
     }
     return None;
 }
