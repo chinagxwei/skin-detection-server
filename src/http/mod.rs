@@ -36,8 +36,8 @@ impl<T: Serialize> DataResult<T> {
 
 #[derive(Serialize, Deserialize)]
 enum MachineMessageEvent {
-    Login = 1,
-    SetQrcode = 2,
+    LoginEvent = 1,
+    SetQrcodeEvent = 2,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -51,7 +51,7 @@ impl From<MachineQrcode> for MachineMessage {
     fn from(qrcode: MachineQrcode) -> Self {
         MachineMessage {
             id: qrcode.id,
-            event: MachineMessageEvent::SetQrcode,
+            event: MachineMessageEvent::SetQrcodeEvent,
             data: qrcode.url,
         }
     }
@@ -61,7 +61,7 @@ impl From<MachineLogin> for MachineMessage {
     fn from(login: MachineLogin) -> Self {
         MachineMessage {
             id: login.id,
-            event: MachineMessageEvent::Login,
+            event: MachineMessageEvent::LoginEvent,
             data: login.openid,
         }
     }
