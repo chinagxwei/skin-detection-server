@@ -72,12 +72,11 @@ impl Machine {
 
 pub struct MachineManager {
     map: HashMap<MachineID, Machine>,
-    interactive_log: Vec<String>,
 }
 
 impl MachineManager {
     pub fn new() -> Self {
-        MachineManager { map: HashMap::new(), interactive_log: Vec::with_capacity(20) }
+        MachineManager { map: HashMap::new() }
     }
 
     pub fn init_map(&mut self, map: HashMap<MachineID, Machine>) {
@@ -124,6 +123,10 @@ impl MachineContainer {
 
     pub async fn machine_list_json(&self) -> Json<DataResult<HashMap<MachineID, Machine>>> {
         self.container.lock().await.list_json_result()
+    }
+
+    pub async fn init_machines(&self, machines: HashMap<MachineID, Machine>) {
+        self.container.lock().await.init_map(machines);
     }
 }
 
