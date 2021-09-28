@@ -5,7 +5,7 @@ use axum::{Router, Json};
 use axum::http::StatusCode;
 use serde::{Serialize, Deserialize};
 
-use crate::{MACHINE_CONTAINER, SUBSCRIPT};
+use crate::{MACHINE_CONTAINER, SUBSCRIPT, MachineID};
 use axum::extract::Query;
 use crate::mqtt::v3_server::{TopicMessage, ClientID};
 use crate::mqtt::message::v3;
@@ -114,7 +114,8 @@ async fn get_machines() -> impl IntoResponse {
 ///
 async fn set_machine_qrcode(Query(payload): Query<MachineQrcode>) -> impl IntoResponse {
     let entity = MachineMessage::from(payload);
-
+    let id = MachineID(entity.id.clone());
+    MACHINE_CONTAINER.set_qrcode(&id, entity.data.clone()).await;
     broadcast(entity).await
 }
 

@@ -343,7 +343,7 @@ mod tests {
             116, 112, 115, 58, 47, 47,
             99, 110, 46, 98, 105, 110,
             103, 46, 99, 111, 109, 34, 125];
-        let base_msg: BaseMessage = biny.as_ref().into();
+        let base_msg: BaseMessage = binary.as_ref().into();
         let msg: PublishMessage = base_msg.into();
         println!("{:?}", msg);
     }
