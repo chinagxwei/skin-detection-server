@@ -114,5 +114,7 @@ async fn handle_v3_disconnect(line: &mut Line) -> Option<MqttMessageV3> {
         SUBSCRIPT.broadcast(line.get_will_topic(), &topic_msg).await;
     }
     SUBSCRIPT.exit(line.get_client_id()).await;
+    let id = MachineID(line.get_client_id().as_string());
+    MACHINE_CONTAINER.remove(&id).await;
     return Some(MqttMessageV3::Disconnect(DisconnectMessage::default()));
 }

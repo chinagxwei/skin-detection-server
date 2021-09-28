@@ -13,6 +13,12 @@ use crate::mqtt::v3_handle;
 #[derive(Debug, Clone, Eq, Hash)]
 pub struct ClientID(pub String);
 
+impl ClientID {
+    pub fn as_string(&self) -> String {
+        self.0.clone()
+    }
+}
+
 impl AsRef<ClientID> for ClientID {
     fn as_ref(&self) -> &ClientID {
         &self

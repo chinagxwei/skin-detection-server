@@ -138,6 +138,10 @@ impl MachineContainer {
     pub async fn init_machines(&self, machines: HashMap<MachineID, Machine>) {
         self.container.lock().await.init_map(machines);
     }
+
+    pub async fn set_qrcode(&mut self, id: &MachineID, qrcode_url: String) {
+        self.container.lock().await.set_qrcode(id, qrcode_url)
+    }
 }
 
 #[cfg(test)]
