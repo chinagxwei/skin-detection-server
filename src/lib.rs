@@ -56,17 +56,20 @@ impl MachineStatus {
 pub struct Machine {
     id: String,
     qrcode_url: String,
-    topic: String,
     status: MachineStatus,
 }
 
 impl Machine {
-    fn online(&mut self) {
+    pub fn online(&mut self) {
         self.status = MachineStatus::Online;
     }
 
-    fn offline(&mut self) {
+    pub fn offline(&mut self) {
         self.status = MachineStatus::Offline;
+    }
+
+    pub fn set_qrcode_url(&mut self, qrcode_url: String) {
+        self.qrcode_url = qrcode_url;
     }
 }
 
@@ -81,6 +84,13 @@ impl MachineManager {
 
     pub fn init_map(&mut self, map: HashMap<MachineID, Machine>) {
         self.map = map;
+    }
+
+    pub fn set_qrcode(&mut self, id: &MachineID, qrcode_url: String) {
+        if self.map.contains_key(id) {
+            let item = self.map.get_mut(&id).expect("append machine error");
+            item.set_qrcode_url(qrcode_url);
+        }
     }
 
     pub fn append(&mut self, id: MachineID, machine: Machine) {
@@ -142,7 +152,6 @@ mod tests {
             Machine {
                 id: String::from("1"),
                 qrcode_url: "".to_string(),
-                topic: "".to_string(),
                 status: MachineStatus::Offline,
             },
         );
@@ -151,7 +160,6 @@ mod tests {
             Machine {
                 id: String::from("2"),
                 qrcode_url: "".to_string(),
-                topic: "".to_string(),
                 status: MachineStatus::Offline,
             },
         );
