@@ -55,6 +55,16 @@ pub enum TopicMessage {
     Will(PublishMessage),
 }
 
+impl TopicMessage {
+    pub fn get_topic(&self) -> Option<&String> {
+        match self {
+            TopicMessage::ContentV3(_, msg) => { Some(&msg.topic) }
+            TopicMessage::ContentV5(_, msg) => { Some(&msg.topic) }
+            TopicMessage::Will(_) => { None }
+        }
+    }
+}
+
 pub struct Subscript {
     container: Arc<Mutex<HashMap<String, Topic>>>,
 }

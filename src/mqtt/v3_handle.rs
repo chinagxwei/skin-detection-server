@@ -12,7 +12,7 @@ use crate::mqtt::message::v3::{
     SubackMessage,
 };
 use crate::mqtt::tools::protocol::MqttQos;
-use crate::SUBSCRIPT;
+use crate::{SUBSCRIPT, MACHINE_CONTAINER, MachineID, Machine, MachineStatus};
 
 pub async fn match_v3_data(line: &mut Line, base_msg: BaseMessage) -> Option<MqttMessageKind> {
     if let Some(v3) = MqttMessageKind::v3(base_msg) {
@@ -48,6 +48,11 @@ async fn handle_v3(line: &mut Line, kind_opt: Option<&MqttMessageV3>) -> Option<
     if let Some(kind) = kind_opt {
         match kind {
             MqttMessageV3::Connect(msg) => {
+                MACHINE_CONTAINER.append(MachineID(msg.payload.client_id.clone()), Machine {
+                    id: msg.payload.client_id.clone(),
+                    qrcode_url: "".to_string(),
+                    status: MachineStatus::Online,
+                }).await;
                 line.init_v3(msg);
                 return Some(MqttMessageV3::Connack(ConnackMessage::default()));
             }

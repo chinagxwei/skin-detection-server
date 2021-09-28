@@ -82,7 +82,6 @@ struct MachineLogin {
 pub async fn http_server() {
     tracing_subscriber::fmt::init();
 
-    // build our application with a route
     let app = Router::new()
         // `GET /` goes to `root`
         .route("/", get(root))
@@ -90,8 +89,6 @@ pub async fn http_server() {
         .route("/set_machine_qrcode", get(set_machine_qrcode))
         .route("/machine_login", get(machine_login));
 
-    // run our app with hyper
-    // `axum::Server` is a re-export of `hyper::Server`
     let addr = SocketAddr::from(([127, 0, 0, 1], 7878));
     tracing::debug!("listening on {}", addr);
     println!("listening on {}", addr);
@@ -115,17 +112,9 @@ async fn get_machines() -> impl IntoResponse {
 ///
 /// 设置机器二维码
 ///
-async fn set_machine_qrcode(Query(payload): Query<MachineQrcode>) -> Json<SimpleDataResult> {
+async fn set_machine_qrcode(Query(payload): Query<MachineQrcode>) -> impl IntoResponse {
     let entity = MachineMessage::from(payload);
-    let msg = v3::PublishMessage::simple_new_msg(
-        entity.id.clone(),
-        0,
-        serde_json::to_string(&entity).unwrap(),
-    );
-    let topic = msg.topic.clone();
-    let topic_msg = TopicMessage::ContentV3(ClientID("idreamspace-server".to_string()), msg);
-    SUBSCRIPT.broadcast(&topic, &topic_msg).await;
-    Json(SimpleDataResult::default())
+    broadcast(entity).await
 }
 
 ///
@@ -133,13 +122,19 @@ async fn set_machine_qrcode(Query(payload): Query<MachineQrcode>) -> Json<Simple
 ///
 async fn machine_login(Query(payload): Query<MachineLogin>) -> impl IntoResponse {
     let entity = MachineMessage::from(payload);
+    broadcast(entity).await
+}
+
+async fn broadcast(msg: MachineMessage) -> (StatusCode, Json<SimpleDataResult>) {
+    let topic = format!("{}-topic", msg.id.clone());
     let msg = v3::PublishMessage::simple_new_msg(
-        entity.id.clone(),
+        topic,
         0,
-        serde_json::to_string(&entity).unwrap(),
+        serde_json::to_string(&msg).unwrap(),
     );
-    let topic = msg.topic.clone();
     let topic_msg = TopicMessage::ContentV3(ClientID("idreamspace-server".to_string()), msg);
-    SUBSCRIPT.broadcast(&topic, &topic_msg).await;
+    if let Some(topic) = topic_msg.get_topic() {
+        SUBSCRIPT.broadcast(topic, &topic_msg).await;
+    }
     (StatusCode::OK, Json(SimpleDataResult::default()))
 }

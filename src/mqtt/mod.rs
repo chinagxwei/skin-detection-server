@@ -11,17 +11,18 @@ pub mod v3_server;
 pub mod v3_handle;
 
 pub struct MqttServer {
-    host: String,
+    host: [u8; 4],
     port: u32,
 }
 
 impl MqttServer {
-    pub fn new<S: Into<String>>(host: S, port: u32) -> MqttServer {
-        MqttServer { host: host.into(), port }
+    pub fn new(host: [u8; 4], port: u32) -> MqttServer {
+        MqttServer { host, port }
     }
 
     pub async fn start(&self) {
-        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).await.expect("listener error");
+        let address = format!("{}.{}.{}.{}:{}", self.host[0], self.host[1], self.host[2], self.host[3], self.port);
+        let listener = TcpListener::bind(address).await.expect("listener error");
 
         loop {
             let (mut socket, _) = listener.accept().await.expect("listener accept error");
@@ -63,6 +64,6 @@ impl MqttServer {
 }
 
 pub async fn mqtt_server() {
-    let server = MqttServer::new("127.0.0.1", 22222);
+    let server = MqttServer::new([127, 0, 0, 1], 22222);
     server.start().await;
 }
