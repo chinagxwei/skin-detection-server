@@ -1,6 +1,4 @@
 use crate::mqtt::hex::{PropertyItem, Property};
-use crate::mqtt::message::v5::ConnectMessage;
-use crate::mqtt::tools::types::TypeKind;
 
 pub fn connect(data: &Vec<PropertyItem>) -> Vec<u8> {
     let mut length = 0_usize;

@@ -220,7 +220,7 @@ impl From<BaseMessage> for SubackMessage {
 }
 
 impl From<SubscribeMessage> for SubackMessage {
-    fn from(mut smsg: SubscribeMessage) -> Self {
+    fn from(smsg: SubscribeMessage) -> Self {
         let codes = if (smsg.qos.unwrap() as u32) < 3 {
             smsg.qos.unwrap().as_byte().to_ne_bytes().to_vec()
         } else {

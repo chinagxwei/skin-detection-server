@@ -1,5 +1,5 @@
-use crate::mqtt::server::{Line, LineMessage};
-use tokio::io::{AsyncReadExt, AsyncWriteExt, AsyncWrite};
+use crate::mqtt::v3_server::{Line, LineMessage};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 use crate::mqtt::message::MqttMessageKind;
 
@@ -7,7 +7,7 @@ pub mod hex;
 pub mod tools;
 pub mod packet;
 pub mod message;
-pub mod server;
+pub mod v3_server;
 pub mod v3_handle;
 
 pub struct MqttServer {
@@ -29,12 +29,10 @@ impl MqttServer {
             tokio::spawn(async move {
                 let mut buf = [0; 1024];
                 let mut line = Line::new();
-                // In a loop, read data from the socket and write the data back.
                 'end_loop: loop {
                     let res = tokio::select! {
                             Ok(n) = socket.read(&mut buf) => {
                                 if n != 0 {
-                                    // println!("length: {}",n);
                                     line.get_sender().send(LineMessage::SocketMessage(buf[0..n].to_vec())).await;
                                 }
                                 None
@@ -64,7 +62,7 @@ impl MqttServer {
     }
 }
 
-pub async fn mqtt_server(){
+pub async fn mqtt_server() {
     let server = MqttServer::new("127.0.0.1", 22222);
     server.start().await;
 }

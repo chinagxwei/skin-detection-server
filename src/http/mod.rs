@@ -4,14 +4,11 @@ use axum::response::{Html, IntoResponse};
 use axum::{Router, Json};
 use axum::http::StatusCode;
 use serde::{Serialize, Deserialize};
-use crate::{MachineManager, MachineID, Machine};
 
 use crate::{MACHINE_CONTAINER, SUBSCRIPT};
 use axum::extract::Query;
-use crate::mqtt::server::{TopicMessage, ClientID};
+use crate::mqtt::v3_server::{TopicMessage, ClientID};
 use crate::mqtt::message::v3;
-use crate::mqtt::tools::protocol::{MqttQos, MqttDup, MqttRetain};
-use rand::Rng;
 
 #[derive(Serialize)]
 pub struct DataResult<T: Serialize> {
@@ -108,10 +105,16 @@ async fn root() -> Html<&'static str> {
     Html("<h1>Skin detection server</h1>")
 }
 
+///
+/// 返回机器列表
+///
 async fn get_machines() -> impl IntoResponse {
     (StatusCode::OK, MACHINE_CONTAINER.machine_list_json().await)
 }
 
+///
+/// 设置机器二维码
+///
 async fn set_machine_qrcode(Query(payload): Query<MachineQrcode>) -> Json<SimpleDataResult> {
     let entity = MachineMessage::from(payload);
     let msg = v3::PublishMessage::simple_new_msg(
@@ -120,11 +123,14 @@ async fn set_machine_qrcode(Query(payload): Query<MachineQrcode>) -> Json<Simple
         serde_json::to_string(&entity).unwrap(),
     );
     let topic = msg.topic.clone();
-    let topic_msg = TopicMessage::ContentV3(ClientID(entity.id), msg);
+    let topic_msg = TopicMessage::ContentV3(ClientID("idreamspace-server".to_string()), msg);
     SUBSCRIPT.broadcast(&topic, &topic_msg).await;
     Json(SimpleDataResult::default())
 }
 
+///
+/// 告知机器用户已经登录，并返回用户openid
+///
 async fn machine_login(Query(payload): Query<MachineLogin>) -> impl IntoResponse {
     let entity = MachineMessage::from(payload);
     let msg = v3::PublishMessage::simple_new_msg(
@@ -133,7 +139,7 @@ async fn machine_login(Query(payload): Query<MachineLogin>) -> impl IntoResponse
         serde_json::to_string(&entity).unwrap(),
     );
     let topic = msg.topic.clone();
-    let topic_msg = TopicMessage::ContentV3(ClientID(entity.id), msg);
+    let topic_msg = TopicMessage::ContentV3(ClientID("idreamspace-server".to_string()), msg);
     SUBSCRIPT.broadcast(&topic, &topic_msg).await;
     (StatusCode::OK, Json(SimpleDataResult::default()))
 }

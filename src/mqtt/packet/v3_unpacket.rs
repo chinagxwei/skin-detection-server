@@ -1,15 +1,12 @@
-use crate::mqtt::tools::pack_tool::{pack_protocol_name, pack_connect_flags, pack_client_id, pack_will_topic, pack_will_message, pack_username, pack_password, pack_header, pack_message_short_id, pack_string, pack_publish_header, pack_short_int};
-use crate::mqtt::tools::protocol::{MqttWillFlag, MqttSessionPresent, MqttQos, MqttDup, MqttRetain};
-use crate::mqtt::hex::reason_code::{ReasonCodes, ReasonCodeV3};
-use crate::mqtt::tools::types::TypeKind;
+use crate::mqtt::tools::protocol::{MqttSessionPresent, MqttQos, MqttDup, MqttRetain};
 use crate::mqtt::message::v3::{ConnectMessage, PublishMessage, SubscribeMessage, SubackMessage, UnsubscribeMessage, ConnackMessage, UnsubackMessage, PubackMessage, PubrecMessage, PubrelMessage, PubcompMessage};
-use crate::mqtt::message::{BaseMessage, ConnectMessagePayload};
+use crate::mqtt::message::{BaseMessage};
 use crate::mqtt::tools::un_pack_tool::{get_connect_variable_header, get_connect_payload_data, parse_short_int, parse_string, parse_byte, get_remaining_data};
 use std::convert::TryFrom;
 
-pub fn connect(mut base: BaseMessage) -> ConnectMessage {
+pub fn connect(base: BaseMessage) -> ConnectMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
-    let (mut variable_header, last_data) = get_connect_variable_header(message_bytes);
+    let (variable_header, last_data) = get_connect_variable_header(message_bytes);
 
     let payload = get_connect_payload_data(
         variable_header.protocol_level.unwrap(),
@@ -33,9 +30,9 @@ pub fn connect(mut base: BaseMessage) -> ConnectMessage {
     }
 }
 
-pub fn connack(mut base: BaseMessage) -> ConnackMessage {
+pub fn connack(base: BaseMessage) -> ConnackMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
-    let session_present = MqttSessionPresent::try_from((message_bytes.get(0).unwrap() & 1)).unwrap();
+    let session_present = MqttSessionPresent::try_from(message_bytes.get(0).unwrap() & 1).unwrap();
     let return_code = *message_bytes.get(1).unwrap();
     ConnackMessage {
         msg_type: base.msg_type,
@@ -45,7 +42,7 @@ pub fn connack(mut base: BaseMessage) -> ConnackMessage {
     }
 }
 
-pub fn publish(mut base: BaseMessage) -> PublishMessage {
+pub fn publish(base: BaseMessage) -> PublishMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
     let (topic, last_data) = parse_string(message_bytes).unwrap();
     let (message_id, msg_body) = if base.qos.is_some() {
@@ -75,7 +72,7 @@ pub fn publish(mut base: BaseMessage) -> PublishMessage {
     }
 }
 
-pub fn subscribe(mut base: BaseMessage) -> Vec<SubscribeMessage> {
+pub fn subscribe(base: BaseMessage) -> Vec<SubscribeMessage> {
     let mut subs = vec![];
     let mut data_bytes = base.bytes.as_slice();
     loop {
@@ -101,7 +98,7 @@ pub fn subscribe(mut base: BaseMessage) -> Vec<SubscribeMessage> {
     subs
 }
 
-pub fn unsubscribe(mut base: BaseMessage) -> Vec<UnsubscribeMessage> {
+pub fn unsubscribe(base: BaseMessage) -> Vec<UnsubscribeMessage> {
     let mut subs = vec![];
     let mut data_bytes = base.bytes.as_slice();
 
@@ -126,13 +123,13 @@ pub fn unsubscribe(mut base: BaseMessage) -> Vec<UnsubscribeMessage> {
     subs
 }
 
-pub fn unsuback(mut base: BaseMessage) -> UnsubackMessage {
+pub fn unsuback(base: BaseMessage) -> UnsubackMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
     let (message_id, _) = parse_short_int(message_bytes);
     UnsubackMessage { msg_type: base.msg_type, message_id, bytes: Some(base.bytes) }
 }
 
-pub fn suback(mut base: BaseMessage) -> SubackMessage {
+pub fn suback(base: BaseMessage) -> SubackMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
     let (message_id, last_data) = parse_short_int(message_bytes);
     let codes = last_data.to_vec();
@@ -144,25 +141,25 @@ pub fn suback(mut base: BaseMessage) -> SubackMessage {
     }
 }
 
-pub fn puback(mut base: BaseMessage) -> PubackMessage {
+pub fn puback(base: BaseMessage) -> PubackMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
     let (message_id, _) = parse_short_int(message_bytes);
     PubackMessage { msg_type: base.msg_type, message_id, bytes: Some(base.bytes) }
 }
 
-pub fn pubrec(mut base: BaseMessage) -> PubrecMessage {
+pub fn pubrec(base: BaseMessage) -> PubrecMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
     let (message_id, _) = parse_short_int(message_bytes);
     PubrecMessage { msg_type: base.msg_type, message_id, bytes: Some(base.bytes) }
 }
 
-pub fn pubrel(mut base: BaseMessage) -> PubrelMessage {
+pub fn pubrel(base: BaseMessage) -> PubrelMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
     let (message_id, _) = parse_short_int(message_bytes);
     PubrelMessage { msg_type: base.msg_type, message_id, bytes: Some(base.bytes) }
 }
 
-pub fn pubcomp(mut base: BaseMessage) -> PubcompMessage {
+pub fn pubcomp(base: BaseMessage) -> PubcompMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
     let (message_id, _) = parse_short_int(message_bytes);
     PubcompMessage { msg_type: base.msg_type, message_id, bytes: Some(base.bytes) }

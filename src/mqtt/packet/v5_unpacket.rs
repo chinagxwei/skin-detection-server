@@ -6,10 +6,10 @@ use crate::mqtt::tools::protocol::{MqttQos, MqttNoLocal, MqttRetainAsPublished, 
 use std::convert::TryFrom;
 use crate::mqtt::hex::reason_code::ReasonPhrases;
 
-pub fn connect(mut base: BaseMessage) -> ConnectMessage {
+pub fn connect(base: BaseMessage) -> ConnectMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
 
-    let (mut variable_header, last_data) = get_connect_variable_header(message_bytes);
+    let (variable_header, last_data) = get_connect_variable_header(message_bytes);
 
     let (properties_total_length, last_data) = parse_byte(last_data);
 
@@ -22,7 +22,7 @@ pub fn connect(mut base: BaseMessage) -> ConnectMessage {
         (Some(Vec::default()), last_data)
     };
 
-    let mut payload = get_connect_payload_data(
+    let payload = get_connect_payload_data(
         variable_header.protocol_level.unwrap(),
         last_data,
         variable_header.will_flag.unwrap(),
@@ -45,10 +45,10 @@ pub fn connect(mut base: BaseMessage) -> ConnectMessage {
     }
 }
 
-pub fn connack(mut base: BaseMessage) -> ConnackMessage {
+pub fn connack(base: BaseMessage) -> ConnackMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
 
-    let session_present = MqttSessionPresent::try_from((message_bytes.get(0).unwrap() & 1)).unwrap();
+    let session_present = MqttSessionPresent::try_from(message_bytes.get(0).unwrap() & 1).unwrap();
 
     let (return_code, last_data) = parse_byte(message_bytes);
 
@@ -69,7 +69,7 @@ pub fn connack(mut base: BaseMessage) -> ConnackMessage {
     }
 }
 
-pub fn publish(mut base: BaseMessage) -> PublishMessage {
+pub fn publish(base: BaseMessage) -> PublishMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
 
     let (topic, last_data) = parse_string(message_bytes).unwrap();
@@ -115,7 +115,7 @@ pub fn publish(mut base: BaseMessage) -> PublishMessage {
     }
 }
 
-pub fn subscribe(mut base: BaseMessage) -> Vec<SubscribeMessage> {
+pub fn subscribe(base: BaseMessage) -> Vec<SubscribeMessage> {
     println!("{:?}", base.bytes);
     let mut subs = vec![];
     let mut data_bytes = base.bytes.as_slice();
@@ -165,7 +165,7 @@ pub fn subscribe(mut base: BaseMessage) -> Vec<SubscribeMessage> {
     subs
 }
 
-pub fn unsubscribe(mut base: BaseMessage) -> Vec<UnsubscribeMessage> {
+pub fn unsubscribe(base: BaseMessage) -> Vec<UnsubscribeMessage> {
     let mut subs = vec![];
     let mut data_bytes = base.bytes.as_slice();
 
@@ -207,7 +207,7 @@ pub fn unsubscribe(mut base: BaseMessage) -> Vec<UnsubscribeMessage> {
     subs
 }
 
-pub fn suback(mut base: BaseMessage) -> SubackMessage {
+pub fn suback(base: BaseMessage) -> SubackMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
 
     let (message_id, last_data) = parse_short_int(message_bytes);
@@ -231,7 +231,7 @@ pub fn suback(mut base: BaseMessage) -> SubackMessage {
     }
 }
 
-pub fn unsuback(mut base: BaseMessage) -> UnsubackMessage {
+pub fn unsuback(base: BaseMessage) -> UnsubackMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
 
     let (message_id, last_data) = parse_short_int(message_bytes);
@@ -255,7 +255,7 @@ pub fn unsuback(mut base: BaseMessage) -> UnsubackMessage {
     }
 }
 
-pub fn disconnect(mut base: BaseMessage) -> DisconnectMessage {
+pub fn disconnect(base: BaseMessage) -> DisconnectMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
 
     let (code, mut last_data) = if message_bytes.len() > 0 {
@@ -286,7 +286,7 @@ pub fn disconnect(mut base: BaseMessage) -> DisconnectMessage {
     }
 }
 
-pub fn auth(mut base: BaseMessage) -> AuthMessage {
+pub fn auth(base: BaseMessage) -> AuthMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
 
     let (code, mut last_data) = if message_bytes.len() > 0 {
@@ -317,7 +317,7 @@ pub fn auth(mut base: BaseMessage) -> AuthMessage {
     }
 }
 
-pub fn get_reason_code(mut base: BaseMessage) -> CommonPayloadMessage {
+pub fn get_reason_code(base: BaseMessage) -> CommonPayloadMessage {
     let message_bytes = base.bytes.get(2..).unwrap();
 
     let (message_id, last_data) = parse_short_int(message_bytes);

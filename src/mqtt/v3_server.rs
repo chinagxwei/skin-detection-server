@@ -1,12 +1,10 @@
-use crate::mqtt::message::v3::{ PublishMessage, ConnectMessage};
-use crate::mqtt::message::{BaseConnect,BaseMessage};
+use crate::mqtt::message::v3::{PublishMessage, ConnectMessage};
+use crate::mqtt::message::{BaseConnect, BaseMessage};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use std::collections::HashMap;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::{Sender, Receiver};
-use tokio::net::TcpStream;
-use tokio::io::{AsyncWriteExt, AsyncReadExt};
 use crate::mqtt::tools::protocol::{MqttProtocolLevel, MqttWillFlag, MqttQos, MqttRetain, MqttDup};
 use crate::mqtt::message::{MqttMessageKind, MqttMessage, MqttBytesMessage};
 use crate::mqtt::tools::types::TypeKind;
@@ -275,49 +273,51 @@ impl Line {
             None => { None }
             Some(msg) => {
                 match msg {
-                    LineMessage::SocketMessage(msg) => {
-                        // println!("socket msg");
-                        let base_msg = BaseMessage::from(msg);
-                        if base_msg.get_message_type() == TypeKind::CONNECT {
-                            let connect = BaseConnect::from(&base_msg);
-                            self.init_protocol(connect.get_protocol_name(), connect.get_protocol_level());
-                        }
-
-                        if let Some(level) = self.protocol_level {
-                            return match level {
-                                MqttProtocolLevel::Level3_1_1 => v3_handle::match_v3_data(self, base_msg).await,
-                                _ => { return None; }
-                            };
-                        }
-                        None
-                    }
-                    LineMessage::SubscriptionMessage(msg) => {
-                        // println!("subscription msg");
-                        return match msg {
-                            TopicMessage::ContentV3(from_id, content) => {
-                                println!("from: {:?}", from_id);
-                                println!("to: {:?}", self.get_client_id());
-                                if self.get_client_id() != &from_id {
-                                    return Some(MqttMessageKind::Response(content.as_bytes().to_vec()));
-                                }
-                                None
-                            }
-                            TopicMessage::ContentV5(from_id, content) => {
-                                println!("from: {:?}", from_id);
-                                println!("to: {:?}", self.get_client_id());
-                                if self.get_client_id() != &from_id {
-                                    return Some(MqttMessageKind::Response(content.as_bytes().to_vec()));
-                                }
-                                None
-                            }
-                            TopicMessage::Will(content) => {
-                                Some(MqttMessageKind::Response(content.as_bytes().to_vec()))
-                            }
-                        };
-                    }
+                    LineMessage::SocketMessage(msg) => self.handle_socket_message(msg).await,
+                    LineMessage::SubscriptionMessage(msg) => self.handle_subscription_message(msg)
                 }
             }
         }
+    }
+
+    async fn handle_socket_message(&mut self, msg: Vec<u8>) -> Option<MqttMessageKind> {
+        let base_msg = BaseMessage::from(msg);
+        if base_msg.get_message_type() == TypeKind::CONNECT {
+            let connect = BaseConnect::from(&base_msg);
+            self.init_protocol(connect.get_protocol_name(), connect.get_protocol_level());
+        }
+
+        if let Some(level) = self.protocol_level {
+            return match level {
+                MqttProtocolLevel::Level3_1_1 => v3_handle::match_v3_data(self, base_msg).await,
+                _ => { return None; }
+            };
+        }
+        None
+    }
+
+    fn handle_subscription_message(&mut self, msg: TopicMessage) -> Option<MqttMessageKind> {
+        return match msg {
+            TopicMessage::ContentV3(from_id, content) => {
+                println!("from: {:?}", from_id);
+                println!("to: {:?}", self.get_client_id());
+                if self.get_client_id() != &from_id {
+                    return Some(MqttMessageKind::Response(content.as_bytes().to_vec()));
+                }
+                None
+            }
+            TopicMessage::ContentV5(from_id, content) => {
+                println!("from: {:?}", from_id);
+                println!("to: {:?}", self.get_client_id());
+                if self.get_client_id() != &from_id {
+                    return Some(MqttMessageKind::Response(content.as_bytes().to_vec()));
+                }
+                None
+            }
+            TopicMessage::Will(content) => {
+                Some(MqttMessageKind::Response(content.as_bytes().to_vec()))
+            }
+        };
     }
 }
 

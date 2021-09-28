@@ -1,7 +1,5 @@
 use num_enum::TryFromPrimitive;
-use crate::mqtt::tools::types::TypeKind;
-use std::convert::{TryFrom, Infallible};
-use crate::mqtt::tools::un_pack_tool::{parse_long_int, parse_string, parse_byte, parse_short_int, get_remaining_data, get_remaining_length, unpack_var_int};
+use crate::mqtt::tools::un_pack_tool::{parse_long_int, parse_string, parse_byte, parse_short_int, unpack_var_int};
 use crate::mqtt::tools::pack_tool::{pack_long_int, pack_string, pack_byte, pack_short_int, pack_var_int};
 
 
@@ -294,14 +292,14 @@ impl Property {
                 let user = item.as_map();
                 let user_key = pack_string(user.as_ref().unwrap().0);
                 let user_value = pack_string(user.as_ref().unwrap().1);
-                *length += (user_key.len() + user_value.len() + 5);
+                *length += user_key.len() + user_value.len() + 5;
                 body.push(Property::UserProperty as u8);
                 body.extend(user_key);
                 body.extend(user_value);
             }
             Property::SubscriptionIdentifier => {
                 let si = pack_var_int(1);
-                *length += (si.len() + 1);
+                *length += si.len() + 1;
                 body.extend(si);
             }
         }
@@ -327,7 +325,7 @@ impl Property {
             Property::AuthenticationMethod |
             Property::AuthenticationData => {
                 let (val, last_data) = parse_string(data).unwrap();
-                *length -= (val.len() as u32 + 3);
+                *length -= val.len() as u32 + 3;
                 Some((PropertyItem(*self, PropertyValue::String(val)), last_data.unwrap()))
             }
             Property::PayloadFormatIndicator |
@@ -353,12 +351,12 @@ impl Property {
             Property::UserProperty => {
                 let (user_key, last_data) = parse_string(data).unwrap();
                 let (user_value, last_data) = parse_string(last_data.unwrap()).unwrap();
-                *length -= (user_key.len() as u32 + user_value.len() as u32 + 5);
+                *length -= user_key.len() as u32 + user_value.len() as u32 + 5;
                 Some((PropertyItem(Property::UserProperty, PropertyValue::Map(user_key, user_value)), last_data.unwrap()))
             }
             Property::SubscriptionIdentifier => {
                 let (val, last_data) = unpack_var_int(data);
-                *length -= (val.len() as u32 + 1);
+                *length -= val.len() as u32 + 1;
                 Some((PropertyItem(Property::SubscriptionIdentifier, PropertyValue::String(val)), last_data))
             }
         }

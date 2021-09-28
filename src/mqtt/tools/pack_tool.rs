@@ -1,6 +1,5 @@
 use crate::mqtt::tools::types::TypeKind;
-use crate::mqtt::tools::protocol::{MqttSessionPresent, MqttCleanSession, MqttWillFlag, MqttQos, MqttDup, MqttRetain, MqttUsernameFlag, MqttPasswordFlag};
-use crate::mqtt::hex::reason_code::ReasonCodeV3;
+use crate::mqtt::tools::protocol::{MqttCleanSession, MqttWillFlag, MqttQos, MqttDup, MqttRetain};
 use crate::mqtt::message::v3::ConnectMessage;
 
 ///
@@ -8,7 +7,7 @@ use crate::mqtt::message::v3::ConnectMessage;
 ///
 pub fn pack_string(str: &String) -> Vec<u8> {
     let str = str.as_bytes().to_vec();
-    let mut content = pack_short_int((str.len() as u16));
+    let mut content = pack_short_int(str.len() as u16);
     content.extend(str);
     content
 }
@@ -164,7 +163,7 @@ fn pack_remaining_length(mut length: usize) -> Vec<u8> {
         let mut digit = length % 128;
         length = length / 128;
         if length > 0 {
-            digit = (digit | 128);
+            digit = digit | 128;
         }
         remaining.push(digit as u8);
         if length <= 0 { break; }

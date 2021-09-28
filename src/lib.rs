@@ -4,7 +4,7 @@ extern crate lazy_static;
 pub mod mqtt;
 pub mod http;
 
-use crate::mqtt::server::Subscript;
+use crate::mqtt::v3_server::Subscript;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -42,12 +42,32 @@ pub enum MachineStatus {
     Online,
 }
 
+impl MachineStatus {
+    pub fn is_online(&self) -> bool {
+        matches!(self, MachineStatus::Online)
+    }
+
+    pub fn is_offline(&self) -> bool {
+        matches!(self, MachineStatus::Offline)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Machine {
     id: String,
     qrcode_url: String,
     topic: String,
     status: MachineStatus,
+}
+
+impl Machine {
+    fn online(&mut self) {
+        self.status = MachineStatus::Online;
+    }
+
+    fn offline(&mut self) {
+        self.status = MachineStatus::Offline;
+    }
 }
 
 pub struct MachineManager {
@@ -60,12 +80,24 @@ impl MachineManager {
         MachineManager { map: HashMap::new(), interactive_log: Vec::with_capacity(20) }
     }
 
-    pub fn append(&mut self, id: MachineID, machine: Machine) -> Option<Machine> {
-        self.map.insert(id, machine)
+    pub fn init_map(&mut self, map: HashMap<MachineID, Machine>) {
+        self.map = map;
     }
 
-    pub fn remove(&mut self, id: &MachineID) -> Option<Machine> {
-        self.map.remove(id)
+    pub fn append(&mut self, id: MachineID, machine: Machine) {
+        if self.map.contains_key(&id) {
+            let item = self.map.get_mut(&id).expect("append machine error");
+            item.online();
+        } else {
+            self.map.insert(id, machine);
+        }
+    }
+
+    pub fn remove(&mut self, id: &MachineID) {
+        if self.map.contains_key(&id) {
+            let item = self.map.get_mut(&id).expect("remove machine error");
+            item.offline();
+        }
     }
 
     pub fn list_json_result(&self) -> Json<DataResult<HashMap<MachineID, Machine>>> {
@@ -82,12 +114,12 @@ impl MachineContainer {
         MachineContainer { container: Arc::new(Mutex::new(MachineManager::new())) }
     }
 
-    pub async fn append(&self, id: MachineID, machine: Machine) -> Option<Machine> {
-        self.container.lock().await.append(id, machine)
+    pub async fn append(&self, id: MachineID, machine: Machine) {
+        self.container.lock().await.append(id, machine);
     }
 
-    pub async fn remove(&self, id: &MachineID) -> Option<Machine> {
-        self.container.lock().await.remove(id)
+    pub async fn remove(&self, id: &MachineID) {
+        self.container.lock().await.remove(id);
     }
 
     pub async fn machine_list_json(&self) -> Json<DataResult<HashMap<MachineID, Machine>>> {

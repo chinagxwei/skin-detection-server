@@ -9,7 +9,7 @@ use crate::mqtt::hex::un_pack_property;
 /// 获取报文种类
 ///
 pub fn get_type(data: &[u8]) -> (Option<TypeKind>, Option<MqttRetain>, Option<MqttQos>, Option<MqttDup>, &[u8]) {
-    let kind = TypeKind::try_from((data[0] >> 4)).ok();
+    let kind = TypeKind::try_from(data[0] >> 4).ok();
     if kind.unwrap() == TypeKind::PUBLISH {
         let (retain, qos, dup) = get_publish_header(data[0]);
         return (kind, retain, qos, dup, get_remaining_data(data));

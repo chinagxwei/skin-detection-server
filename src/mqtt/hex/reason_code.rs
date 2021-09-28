@@ -1,5 +1,4 @@
 use num_enum::TryFromPrimitive;
-use std::convert::TryFrom;
 use crate::mqtt::tools::protocol::MqttQos;
 
 #[derive(Debug, Copy, Clone, TryFromPrimitive)]

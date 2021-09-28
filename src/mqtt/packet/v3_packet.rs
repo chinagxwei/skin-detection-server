@@ -1,11 +1,8 @@
 use crate::mqtt::tools::pack_tool::{pack_protocol_name, pack_connect_flags, pack_client_id, pack_will_topic, pack_will_message, pack_username, pack_password, pack_header, pack_message_short_id, pack_string, pack_publish_header, pack_short_int};
-use crate::mqtt::tools::protocol::{MqttWillFlag, MqttSessionPresent, MqttQos, MqttDup, MqttRetain};
-use crate::mqtt::hex::reason_code::{ReasonCodes, ReasonCodeV3};
+use crate::mqtt::tools::protocol::{MqttWillFlag, MqttSessionPresent, MqttQos};
+use crate::mqtt::hex::reason_code::{ReasonCodeV3};
 use crate::mqtt::tools::types::TypeKind;
-use crate::mqtt::message::v3::{ConnectMessage, PublishMessage, SubscribeMessage, SubackMessage, UnsubscribeMessage, ConnackMessage, UnsubackMessage, PubackMessage, PubrecMessage, PubrelMessage, PubcompMessage};
-use crate::mqtt::message::{BaseMessage, ConnectMessagePayload};
-use crate::mqtt::tools::un_pack_tool::{get_connect_variable_header, get_connect_payload_data, parse_short_int, parse_string};
-use std::convert::TryFrom;
+use crate::mqtt::message::v3::{ConnectMessage, PublishMessage, SubscribeMessage, SubackMessage, UnsubscribeMessage};
 
 pub fn connect(msg: &ConnectMessage) -> Vec<u8> {
     let mut body: Vec<u8> = pack_protocol_name(&msg.protocol_name);

@@ -3,7 +3,7 @@ use crate::mqtt::tools::un_pack_tool::{get_type, get_protocol_name_and_version};
 use crate::mqtt::message::v3::{
     ConnackMessage, ConnectMessage, DisconnectMessage, MqttMessageV3,
     PubackMessage, PubcompMessage, PublishMessage, PubrecMessage, PubrelMessage,
-    SubackMessage, SubscribeMessage, UnsubackMessage, UnsubscribeMessage,
+    UnsubackMessage
 };
 use crate::mqtt::tools::protocol::{MqttProtocolLevel, MqttDup, MqttQos, MqttRetain};
 use crate::mqtt::hex::PropertyItem;
@@ -89,7 +89,7 @@ impl MqttMessageKind {
             TypeKind::PUBREL => { Some(Self::RequestV3(MqttMessageV3::Pubrel(PubrelMessage::from(base_msg)))) }
             TypeKind::PUBCOMP => { Some(Self::RequestV3(MqttMessageV3::Pubcomp(PubcompMessage::from(base_msg)))) }
             TypeKind::SUBSCRIBE => {
-                let mut subs = v3_unpacket::subscribe(base_msg);
+                let subs = v3_unpacket::subscribe(base_msg);
                 let res = subs.into_iter()
                     .map(|x| MqttMessageV3::Subscribe(x))
                     .collect::<Vec<MqttMessageV3>>();
@@ -97,7 +97,7 @@ impl MqttMessageKind {
             }
             // TypeKind::SUBACK => { Some(Self::RequestV3(MqttMessageV3::Suback(SubackMessage::from(base_msg)))) }
             TypeKind::UNSUBSCRIBE => {
-                let mut subs = v3_unpacket::unsubscribe(base_msg);
+                let subs = v3_unpacket::unsubscribe(base_msg);
                 let res = subs.into_iter()
                     .map(|x| MqttMessageV3::Unsubscribe(x))
                     .collect::<Vec<MqttMessageV3>>();
@@ -105,7 +105,7 @@ impl MqttMessageKind {
             }
             TypeKind::UNSUBACK => { Some(Self::RequestV3(MqttMessageV3::Unsuback(UnsubackMessage::from(base_msg)))) }
             TypeKind::PINGREQ => { Some(Self::RequestV3(MqttMessageV3::Pingresp(PingrespMessage::default()))) }
-            TypeKind::DISCONNECT => { Some(Self::RequestV3(MqttMessageV3::Disconnect((DisconnectMessage::default())))) }
+            TypeKind::DISCONNECT => { Some(Self::RequestV3(MqttMessageV3::Disconnect(DisconnectMessage::default()))) }
             // TypeKind::AUTH => { None }
             _ => { None }
         }
@@ -145,7 +145,7 @@ impl MqttMessageKind {
                 )
             }
             TypeKind::SUBSCRIBE => {
-                let mut subs = crate::mqtt::packet::v5_unpacket::subscribe(base_msg);
+                let subs = crate::mqtt::packet::v5_unpacket::subscribe(base_msg);
                 let res = subs.into_iter()
                     .map(|x| MqttMessageV5::Subscribe(x))
                     .collect::<Vec<MqttMessageV5>>();
@@ -153,7 +153,7 @@ impl MqttMessageKind {
             }
             // TypeKind::SUBACK => {}
             TypeKind::UNSUBSCRIBE => {
-                let mut subs = crate::mqtt::packet::v5_unpacket::unsubscribe(base_msg);
+                let subs = crate::mqtt::packet::v5_unpacket::unsubscribe(base_msg);
                 let res = subs.into_iter()
                     .map(|x| MqttMessageV5::Unsubscribe(x))
                     .collect::<Vec<MqttMessageV5>>();
@@ -194,14 +194,14 @@ impl MqttMessage for BaseMessage {
 
 impl From<Vec<u8>> for BaseMessage {
     fn from(data: Vec<u8>) -> Self {
-        let (mut r#type2, retain, qos, dup, _last_bytes) = get_type(data.as_slice());
+        let (r#type2, retain, qos, dup, _last_bytes) = get_type(data.as_slice());
         BaseMessage { msg_type: r#type2.unwrap(), dup, qos, retain, bytes: data }
     }
 }
 
 impl From<&[u8]> for BaseMessage {
     fn from(data: &[u8]) -> Self {
-        let (mut r#type2, retain, qos, dup, _last_bytes) = get_type(data);
+        let (r#type2, retain, qos, dup, _last_bytes) = get_type(data);
         BaseMessage { msg_type: r#type2.unwrap(), dup, qos, retain, bytes: data.to_vec() }
     }
 }
@@ -231,8 +231,8 @@ impl From<&BaseMessage> for BaseConnect {
     fn from(data: &BaseMessage) -> Self {
         let message_bytes = data.bytes.get(2..).unwrap();
         let (
-            mut protocol_name,
-            mut protocol_level
+            protocol_name,
+            protocol_level
         ) = get_protocol_name_and_version(message_bytes);
         BaseConnect {
             msg_type: data.msg_type,
@@ -266,7 +266,7 @@ impl MqttMessage for PingreqMessage {
 }
 
 impl From<BaseMessage> for PingreqMessage {
-    fn from(mut base: BaseMessage) -> Self {
+    fn from(base: BaseMessage) -> Self {
         PingreqMessage { msg_type: base.msg_type, bytes: base.bytes }
     }
 }
@@ -299,7 +299,7 @@ impl MqttMessage for PingrespMessage {
 }
 
 impl From<BaseMessage> for PingrespMessage {
-    fn from(mut base: BaseMessage) -> Self {
+    fn from(base: BaseMessage) -> Self {
         PingrespMessage { msg_type: base.msg_type, bytes: base.bytes }
     }
 }

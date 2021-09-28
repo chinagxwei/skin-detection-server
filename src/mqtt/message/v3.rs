@@ -1,11 +1,8 @@
 use crate::mqtt::tools::types::TypeKind;
-use crate::mqtt::tools::un_pack_tool::{get_type, parse_string, parse_short_int, get_publish_header, get_connect_variable_header};
-use crate::mqtt::tools::protocol::{MqttProtocolLevel, MqttWillMessage, MqttCleanSession, MqttWillFlag, MqttWillTopic, MqttUsernameFlag, MqttPasswordFlag, MqttSessionPresent, MqttDup, MqttQos, MqttRetain};
-use std::convert::TryFrom;
-use crate::mqtt::hex::reason_code::{ReasonCodeV3, ReasonCodes};
+use crate::mqtt::tools::protocol::{MqttProtocolLevel, MqttCleanSession, MqttWillFlag, MqttUsernameFlag, MqttPasswordFlag, MqttSessionPresent, MqttDup, MqttQos, MqttRetain};
+use crate::mqtt::hex::reason_code::{ReasonCodeV3};
 use crate::mqtt::tools::pack_tool::{pack_header};
 use crate::mqtt::tools::config::Config;
-use crate::mqtt::hex::reason_code::ReasonCodes::V3;
 use crate::mqtt::packet::{v3_packet, v3_unpacket};
 use crate::mqtt::message::{MqttBytesMessage, MqttMessage, BaseMessage, ConnectMessagePayload, PingreqMessage, PingrespMessage};
 
@@ -297,7 +294,7 @@ impl SubackMessage {
 }
 
 impl From<SubscribeMessage> for SubackMessage {
-    fn from(mut smsg: SubscribeMessage) -> Self {
+    fn from(smsg: SubscribeMessage) -> Self {
         let codes = if (smsg.qos as u32) < 3 {
             smsg.qos.as_byte().to_ne_bytes().to_vec()
         } else {
@@ -618,7 +615,7 @@ impl Default for DisconnectMessage {
 }
 
 impl From<BaseMessage> for DisconnectMessage {
-    fn from(mut base: BaseMessage) -> Self {
+    fn from(base: BaseMessage) -> Self {
         DisconnectMessage { msg_type: base.msg_type, bytes: base.bytes }
     }
 }
