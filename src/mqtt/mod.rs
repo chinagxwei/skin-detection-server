@@ -38,7 +38,7 @@ impl MqttServer {
                     let res = tokio::select! {
                             Ok(n) = socket.read(&mut buf) => {
                                 if n != 0 {
-                                    line.get_sender().send(LineMessage::SocketMessage(buf[0..n].to_vec())).await;
+                                    line.get_sender().send(LineMessage::SocketMessage(buf[0..n].to_vec())).await.expect("send async message error");
                                 }
                                 None
                             },

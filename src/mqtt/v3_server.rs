@@ -189,7 +189,7 @@ impl Topic {
 
     pub async fn broadcast(&self, msg: &TopicMessage) {
         for (_, sender) in self.senders.iter() {
-            sender.send(LineMessage::SubscriptionMessage(msg.clone())).await;
+            sender.send(LineMessage::SubscriptionMessage(msg.clone())).await.expect("broadcast async message error");
         }
     }
 

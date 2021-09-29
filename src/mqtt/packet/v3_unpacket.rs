@@ -105,7 +105,7 @@ pub fn unsubscribe(base: BaseMessage) -> Vec<UnsubscribeMessage> {
     loop {
         let remain_data = get_remaining_data(data_bytes);
         let (message_id, last_data) = parse_short_int(remain_data);
-        let (topic, last_data) = parse_string(last_data).unwrap();
+        let (topic, _last_data) = parse_string(last_data).unwrap();
         subs.push(
             UnsubscribeMessage {
                 msg_type: base.msg_type,
