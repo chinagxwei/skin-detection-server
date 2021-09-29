@@ -59,6 +59,6 @@ fn read_file(path: &str) -> Result<String, Box<dyn std::error::Error + Send + Sy
 }
 
 pub fn load_config_file() -> Config {
-    let file = read_file("./config.toml").expect("read config file error");
+    let file = read_file("./config/server.toml").expect("read config file error");
     return toml::from_str(String::from(file).trim()).expect("parse config file error");
 }
