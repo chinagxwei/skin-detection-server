@@ -15,7 +15,7 @@ use crate::http::DataResult;
 use crate::config::{Config, load_config_file};
 
 lazy_static! {
-    static ref CONFIG: Config = load_config_file();
+    pub static ref CONFIG: Config = load_config_file();
     pub static ref SUBSCRIPT: Subscript = Subscript::new();
     pub static ref MACHINE_CONTAINER: MachineContainer = MachineContainer::new();
 }
