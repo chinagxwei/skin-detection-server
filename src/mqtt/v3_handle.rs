@@ -1,16 +1,6 @@
 use crate::mqtt::v3_server::{Line, TopicMessage};
 use crate::mqtt::message::{BaseMessage, MqttMessageKind};
-use crate::mqtt::message::v3::{
-    MqttMessageV3,
-    ConnackMessage,
-    PublishMessage,
-    PubackMessage,
-    SubscribeMessage,
-    UnsubscribeMessage,
-    UnsubackMessage,
-    DisconnectMessage,
-    SubackMessage,
-};
+use crate::mqtt::message::v3::{MqttMessageV3, ConnackMessage, PublishMessage, PubackMessage, SubscribeMessage, UnsubscribeMessage, UnsubackMessage, DisconnectMessage, SubackMessage, PubrelMessage};
 use crate::mqtt::tools::protocol::MqttQos;
 use crate::{SUBSCRIPT, MACHINE_CONTAINER, MachineID, Machine, MachineStatus};
 
@@ -63,6 +53,7 @@ async fn handle_v3(line: &mut Line, kind_opt: Option<&MqttMessageV3>) -> Option<
             MqttMessageV3::Publish(msg) => return handle_v3_publish(line, msg).await,
             MqttMessageV3::Pingresp(msg) => return Some(MqttMessageV3::Pingresp(msg.clone())),
             MqttMessageV3::Disconnect(_) => return handle_v3_disconnect(line).await,
+            MqttMessageV3::Pubrec(msg) => return Some(MqttMessageV3::Pubrel(PubrelMessage::new(msg.message_id))),
             _ => { return None; }
         }
     }
@@ -75,9 +66,7 @@ async fn handle_v3_publish(line: &mut Line, msg: &PublishMessage) -> Option<Mqtt
     SUBSCRIPT.broadcast(&msg.topic, &topic_msg).await;
     if msg.qos == MqttQos::Qos1 {
         return Some(MqttMessageV3::Puback(PubackMessage::new(msg.message_id)));
-    }else if msg.qos == MqttQos::Qos2 {
-
-    }
+    } else if msg.qos == MqttQos::Qos2 {}
     return None;
 }
 
