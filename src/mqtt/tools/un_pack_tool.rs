@@ -4,6 +4,7 @@ use crate::mqtt::tools::protocol::{MqttProtocolLevel, MqttCleanSession, MqttWill
 use crate::mqtt::message::v3::VariableHeader;
 use crate::mqtt::message::ConnectMessagePayload;
 use crate::mqtt::hex::un_pack_property;
+use log::{debug};
 
 ///
 /// 获取报文种类
@@ -78,7 +79,7 @@ pub fn get_connect_payload_data(protocol_level: MqttProtocolLevel, data: &[u8], 
     } else {
         ("".to_string(), last_data)
     };
-    println!("client ID: {}", client_id);
+    debug!("client ID: {}", client_id);
     ConnectMessagePayload {
         client_id,
         will_topic,

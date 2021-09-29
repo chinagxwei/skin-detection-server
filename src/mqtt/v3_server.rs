@@ -9,6 +9,7 @@ use crate::mqtt::tools::protocol::{MqttProtocolLevel, MqttWillFlag, MqttQos, Mqt
 use crate::mqtt::message::{MqttMessageKind, MqttMessage, MqttBytesMessage};
 use crate::mqtt::tools::types::TypeKind;
 use crate::mqtt::v3_handle;
+use log::{debug, error};
 
 #[derive(Debug, Clone, Eq, Hash)]
 pub struct ClientID(pub String);
@@ -114,7 +115,7 @@ impl Subscript {
                 }
             }
             Err(e) => {
-                println!("{:?}", e)
+                error!("{:?}", e)
             }
         }
     }
@@ -167,7 +168,7 @@ impl Topic {
 impl Topic {
     pub fn subscript<S: Into<ClientID>>(&mut self, client_id: S, sender: Sender<LineMessage>) {
         let id = client_id.into();
-        println!("subscript client id: {:?}", &id);
+        debug!("subscript client id: {:?}", &id);
         self.senders.insert(id, sender);
     }
 
@@ -315,16 +316,16 @@ impl Line {
     fn handle_subscription_message(&mut self, msg: TopicMessage) -> Option<MqttMessageKind> {
         return match msg {
             TopicMessage::ContentV3(from_id, content) => {
-                println!("from: {:?}", from_id);
-                println!("to: {:?}", self.get_client_id());
+                debug!("from: {:?}", from_id);
+                debug!("to: {:?}", self.get_client_id());
                 if self.get_client_id() != &from_id {
                     return Some(MqttMessageKind::Response(content.as_bytes().to_vec()));
                 }
                 None
             }
             TopicMessage::ContentV5(from_id, content) => {
-                println!("from: {:?}", from_id);
-                println!("to: {:?}", self.get_client_id());
+                debug!("from: {:?}", from_id);
+                debug!("to: {:?}", self.get_client_id());
                 if self.get_client_id() != &from_id {
                     return Some(MqttMessageKind::Response(content.as_bytes().to_vec()));
                 }

@@ -1,5 +1,6 @@
 use crate::mqtt::hex::{PropertyItem, Property};
 use std::convert::TryFrom;
+use log::{ error};
 
 pub fn connect(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
     let mut properties = vec![];
@@ -15,7 +16,7 @@ pub fn connect(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
                 }
             }
             Err(e) => {
-                println!("Property {:?} not exist", e)
+                error!("Property {:?} not exist", e)
             }
         }
 
@@ -40,7 +41,7 @@ pub fn connack(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
                 }
             }
             Err(e) => {
-                println!("Property {:?} not exist", e)
+                error!("Property {:?} not exist", e)
             }
         }
 
@@ -66,7 +67,7 @@ pub fn publish(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
                 }
             }
             Err(e) => {
-                println!("Property {:?} not exist", e)
+                error!("Property {:?} not exist", e)
             }
         }
 
@@ -92,7 +93,7 @@ pub fn subscribe(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
                 }
             }
             Err(e) => {
-                println!("Property {:?} not exist", e)
+                error!("Property {:?} not exist", e)
             }
         }
 
@@ -118,7 +119,7 @@ pub fn unsubscribe(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
                 }
             }
             Err(e) => {
-                println!("Property {:?} not exist", e)
+                error!("Property {:?} not exist", e)
             }
         }
 
@@ -144,7 +145,7 @@ pub fn suback(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
                 }
             }
             Err(e) => {
-                println!("Property {:?} not exist", e)
+                error!("Property {:?} not exist", e)
             }
         }
 
@@ -170,7 +171,7 @@ pub fn unsuback(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
                 }
             }
             Err(e) => {
-                println!("Property {:?} not exist", e)
+                error!("Property {:?} not exist", e)
             }
         }
 
@@ -196,7 +197,7 @@ pub fn disconnect(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
                 }
             }
             Err(e) => {
-                println!("Property {:?} not exist", e)
+                error!("Property {:?} not exist", e)
             }
         }
 
@@ -222,7 +223,7 @@ pub fn auth(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
                 }
             }
             Err(e) => {
-                println!("Property {:?} not exist", e)
+                error!("Property {:?} not exist", e)
             }
         }
 
@@ -248,7 +249,7 @@ pub fn pub_and_sub(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
                 }
             }
             Err(e) => {
-                println!("Property {:?} not exist", e)
+                error!("Property {:?} not exist", e)
             }
         }
 
@@ -274,7 +275,7 @@ pub fn will_properties(mut length: u32, mut data: &[u8]) -> Vec<PropertyItem> {
                 }
             }
             Err(e) => {
-                println!("Property {:?} not exist", e)
+                error!("Property {:?} not exist", e)
             }
         }
 

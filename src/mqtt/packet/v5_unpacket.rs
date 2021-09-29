@@ -116,7 +116,6 @@ pub fn publish(base: BaseMessage) -> PublishMessage {
 }
 
 pub fn subscribe(base: BaseMessage) -> Vec<SubscribeMessage> {
-    println!("{:?}", base.bytes);
     let mut subs = vec![];
     let mut data_bytes = base.bytes.as_slice();
 
@@ -161,7 +160,6 @@ pub fn subscribe(base: BaseMessage) -> Vec<SubscribeMessage> {
         }
     }
 
-    println!("{:?}", subs);
     subs
 }
 
@@ -203,7 +201,6 @@ pub fn unsubscribe(base: BaseMessage) -> Vec<UnsubscribeMessage> {
         }
     }
 
-    println!("{:?}", subs);
     subs
 }
 

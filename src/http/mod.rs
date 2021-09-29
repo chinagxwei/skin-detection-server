@@ -9,6 +9,7 @@ use crate::{MACHINE_CONTAINER, SUBSCRIPT, MachineID};
 use axum::extract::Query;
 use crate::mqtt::v3_server::{TopicMessage, ClientID};
 use crate::mqtt::message::v3;
+use log::{info, debug};
 
 #[derive(Serialize)]
 pub struct DataResult<T: Serialize> {
@@ -67,21 +68,19 @@ impl From<MachineLogin> for MachineMessage {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct MachineQrcode {
     id: String,
     url: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct MachineLogin {
     id: String,
     openid: String,
 }
 
 pub async fn http_server() {
-    tracing_subscriber::fmt::init();
-
     let app = Router::new()
         // `GET /` goes to `root`
         .route("/", get(root))
@@ -90,8 +89,7 @@ pub async fn http_server() {
         .route("/machine_login", get(machine_login));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 7878));
-    tracing::debug!("listening on {}", addr);
-    println!("listening on {}", addr);
+    info!("listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
@@ -113,6 +111,7 @@ async fn get_machines() -> impl IntoResponse {
 /// 设置机器二维码
 ///
 async fn set_machine_qrcode(Query(payload): Query<MachineQrcode>) -> impl IntoResponse {
+    debug!("{:?}",payload);
     let entity = MachineMessage::from(payload);
     let id = MachineID(entity.id.clone());
     MACHINE_CONTAINER.set_qrcode(&id, entity.data.clone()).await;
@@ -123,6 +122,7 @@ async fn set_machine_qrcode(Query(payload): Query<MachineQrcode>) -> impl IntoRe
 /// 告知机器用户已经登录，并返回用户openid
 ///
 async fn machine_login(Query(payload): Query<MachineLogin>) -> impl IntoResponse {
+    debug!("{:?}",payload);
     let entity = MachineMessage::from(payload);
     broadcast(entity).await
 }

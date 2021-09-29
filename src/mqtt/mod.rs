@@ -2,6 +2,7 @@ use crate::mqtt::v3_server::{Line, LineMessage};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 use crate::mqtt::message::MqttMessageKind;
+use log::{debug};
 
 pub mod hex;
 pub mod tools;
@@ -43,14 +44,14 @@ impl MqttServer {
                     if let Some(kind) = res {
                         match kind {
                             MqttMessageKind::Response(data) => {
-                                println!("data: {:?}", data);
+                                debug!("data: {:?}", data);
                                 if let Err(e) = socket.write_all(data.as_slice()).await {
-                                    println!("failed to write to socket; err = {:?}", e);
+                                    debug!("failed to write to socket; err = {:?}", e);
                                 }
                             }
                             MqttMessageKind::Exit(data) => {
                                 if let Err(e) = socket.write_all(data.as_slice()).await {
-                                    println!("failed to write to socket; err = {:?}", e);
+                                    debug!("failed to write to socket; err = {:?}", e);
                                 }
                                 break 'end_loop;
                             }

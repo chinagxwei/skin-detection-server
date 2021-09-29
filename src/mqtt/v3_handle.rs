@@ -3,6 +3,7 @@ use crate::mqtt::message::{BaseMessage, MqttMessageKind};
 use crate::mqtt::message::v3::{MqttMessageV3, ConnackMessage, PublishMessage, PubackMessage, SubscribeMessage, UnsubscribeMessage, UnsubackMessage, DisconnectMessage, SubackMessage, PubrelMessage};
 use crate::mqtt::tools::protocol::MqttQos;
 use crate::{SUBSCRIPT, MACHINE_CONTAINER, MachineID, Machine, MachineStatus};
+use log::{debug, info};
 
 pub async fn match_v3_data(line: &mut Line, base_msg: BaseMessage) -> Option<MqttMessageKind> {
     if let Some(v3) = MqttMessageKind::v3(base_msg) {
@@ -62,7 +63,7 @@ async fn handle_v3(line: &mut Line, kind_opt: Option<&MqttMessageV3>) -> Option<
 
 async fn handle_v3_publish(line: &mut Line, msg: &PublishMessage) -> Option<MqttMessageV3> {
     let topic_msg = TopicMessage::ContentV3(line.get_client_id().to_owned(), msg.clone());
-    println!("topic: {:?}", topic_msg);
+    debug!("topic: {:?}", topic_msg);
     SUBSCRIPT.broadcast(&msg.topic, &topic_msg).await;
     if msg.qos == MqttQos::Qos1 {
         return Some(MqttMessageV3::Puback(PubackMessage::new(msg.message_id)));
@@ -71,24 +72,24 @@ async fn handle_v3_publish(line: &mut Line, msg: &PublishMessage) -> Option<Mqtt
 }
 
 async fn handle_v3_subscribe(line: &mut Line, msg: &SubscribeMessage) -> Option<MqttMessageV3> {
-    println!("{:?}", msg);
+    debug!("{:?}", msg);
     let topic = &msg.topic;
     if SUBSCRIPT.contain(topic).await {
         SUBSCRIPT.subscript(topic, line.get_client_id(), line.get_sender());
     } else {
         SUBSCRIPT.new_subscript(topic, line.get_client_id(), line.get_sender()).await;
     }
-    println!("broadcast topic len: {}", SUBSCRIPT.len().await);
-    println!("broadcast topic list: {:?}", SUBSCRIPT.topics().await);
-    println!("broadcast client len: {:?}", SUBSCRIPT.client_len(topic).await);
-    println!("broadcast client list: {:?}", SUBSCRIPT.clients(topic).await);
+    debug!("broadcast topic len: {}", SUBSCRIPT.len().await);
+    debug!("broadcast topic list: {:?}", SUBSCRIPT.topics().await);
+    debug!("broadcast client len: {:?}", SUBSCRIPT.client_len(topic).await);
+    debug!("broadcast client list: {:?}", SUBSCRIPT.clients(topic).await);
     let sm = SubackMessage::from(msg.clone());
-    println!("{:?}", sm);
+    debug!("{:?}", sm);
     return Some(MqttMessageV3::Suback(sm));
 }
 
 async fn handle_v3_unsubscribe(line: &mut Line, msg: &UnsubscribeMessage) -> Option<MqttMessageV3> {
-    println!("topic name: {}", &msg.topic);
+    debug!("topic name: {}", &msg.topic);
     if SUBSCRIPT.contain(&msg.topic).await {
         if SUBSCRIPT.is_subscript(&msg.topic, line.get_client_id()).await {
             SUBSCRIPT.unsubscript(&msg.topic, line.get_client_id()).await;
@@ -99,7 +100,7 @@ async fn handle_v3_unsubscribe(line: &mut Line, msg: &UnsubscribeMessage) -> Opt
 }
 
 async fn handle_v3_disconnect(line: &mut Line) -> Option<MqttMessageV3> {
-    println!("client disconnect");
+    info!("client disconnect");
     if line.is_will_flag() {
         let topic_msg = line.get_v3_topic_message();
         SUBSCRIPT.broadcast(line.get_will_topic(), &topic_msg).await;
