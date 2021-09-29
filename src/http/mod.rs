@@ -1,15 +1,16 @@
 use axum::handler::get;
-use std::net::SocketAddr;
+use std::net::{SocketAddr, SocketAddrV4, Ipv4Addr};
 use axum::response::{Html, IntoResponse};
 use axum::{Router, Json};
 use axum::http::StatusCode;
 use serde::{Serialize, Deserialize};
 
-use crate::{MACHINE_CONTAINER, SUBSCRIPT, MachineID};
+use crate::{CONFIG, MACHINE_CONTAINER, SUBSCRIPT, MachineID};
 use axum::extract::Query;
 use crate::mqtt::v3_server::{TopicMessage, ClientID};
 use crate::mqtt::message::v3;
 use log::{info, debug};
+use std::str::FromStr;
 
 #[derive(Serialize)]
 pub struct DataResult<T: Serialize> {
@@ -88,8 +89,13 @@ pub async fn http_server() {
         .route("/set_machine_qrcode", get(set_machine_qrcode))
         .route("/machine_login", get(machine_login));
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 7878));
+    let socket = SocketAddrV4::new(
+        Ipv4Addr::from_str(CONFIG.get_http_ip()).unwrap(),
+        CONFIG.get_http_port(),
+    );
+    let addr = SocketAddr::from(socket);
     info!("http listening on {}", addr);
+
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await

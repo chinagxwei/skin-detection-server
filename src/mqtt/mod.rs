@@ -3,7 +3,10 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 use crate::mqtt::message::MqttMessageKind;
 use log::{debug, info};
-use std::net::SocketAddr;
+use std::net::{SocketAddr, Ipv4Addr, SocketAddrV4};
+use std::str::FromStr;
+
+use crate::CONFIG;
 
 pub mod hex;
 pub mod tools;
@@ -13,19 +16,17 @@ pub mod v3_server;
 pub mod v3_handle;
 
 pub struct MqttServer {
-    host: [u8; 4],
-    port: u16,
+    addr: SocketAddr,
 }
 
 impl MqttServer {
-    pub fn new(host: [u8; 4], port: u16) -> MqttServer {
-        MqttServer { host, port }
+    pub fn new(addr: SocketAddr) -> MqttServer {
+        MqttServer { addr }
     }
 
     pub async fn start(&self) {
-        let addr = SocketAddr::from((self.host, self.port));
-        info!("mqtt listening on {}", addr);
-        let listener = TcpListener::bind(addr).await.expect("listener error");
+        info!("mqtt listening on {}", self.addr);
+        let listener = TcpListener::bind(self.addr).await.expect("listener error");
 
         loop {
             let (mut socket, _) = listener.accept().await.expect("listener accept error");
@@ -67,6 +68,10 @@ impl MqttServer {
 }
 
 pub async fn mqtt_server() {
-    let server = MqttServer::new([127, 0, 0, 1], 22222);
+    let socket = SocketAddrV4::new(
+        Ipv4Addr::from_str(CONFIG.get_mqtt_ip()).unwrap(),
+        CONFIG.get_mqtt_port()
+    );
+    let server = MqttServer::new( SocketAddr::from(socket));
     server.start().await;
 }

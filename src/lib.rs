@@ -3,6 +3,7 @@ extern crate lazy_static;
 
 pub mod mqtt;
 pub mod http;
+mod config;
 
 use crate::mqtt::v3_server::Subscript;
 use std::collections::HashMap;
@@ -11,8 +12,10 @@ use tokio::sync::Mutex;
 use serde::{Deserialize, Serialize};
 use axum::Json;
 use crate::http::DataResult;
+use crate::config::{Config, load_config_file};
 
 lazy_static! {
+    static ref CONFIG: Config = load_config_file();
     pub static ref SUBSCRIPT: Subscript = Subscript::new();
     pub static ref MACHINE_CONTAINER: MachineContainer = MachineContainer::new();
 }

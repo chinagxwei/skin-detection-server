@@ -1,0 +1,8 @@
+[http]
+ip = '127.0.0.1'
+port = 7878
+[mqtt]
+ip = '127.0.0.1'
+port = 22222
+[preload]
+url = ''
