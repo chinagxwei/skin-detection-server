@@ -2,7 +2,8 @@ use crate::mqtt::v3_server::{Line, LineMessage};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 use crate::mqtt::message::MqttMessageKind;
-use log::{debug};
+use log::{debug, info};
+use std::net::SocketAddr;
 
 pub mod hex;
 pub mod tools;
@@ -13,17 +14,18 @@ pub mod v3_handle;
 
 pub struct MqttServer {
     host: [u8; 4],
-    port: u32,
+    port: u16,
 }
 
 impl MqttServer {
-    pub fn new(host: [u8; 4], port: u32) -> MqttServer {
+    pub fn new(host: [u8; 4], port: u16) -> MqttServer {
         MqttServer { host, port }
     }
 
     pub async fn start(&self) {
-        let address = format!("{}.{}.{}.{}:{}", self.host[0], self.host[1], self.host[2], self.host[3], self.port);
-        let listener = TcpListener::bind(address).await.expect("listener error");
+        let addr = SocketAddr::from((self.host, self.port));
+        info!("mqtt listening on {}", addr);
+        let listener = TcpListener::bind(addr).await.expect("listener error");
 
         loop {
             let (mut socket, _) = listener.accept().await.expect("listener accept error");

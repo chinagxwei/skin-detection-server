@@ -89,7 +89,7 @@ pub async fn http_server() {
         .route("/machine_login", get(machine_login));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 7878));
-    info!("listening on {}", addr);
+    info!("http listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
