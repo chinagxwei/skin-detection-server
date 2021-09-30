@@ -1,9 +1,10 @@
-use crate::mqtt::v3_server::{Line, TopicMessage};
-use crate::mqtt::message::{BaseMessage, MqttMessageKind};
+use crate::mqtt::v3_server::{Line, TopicMessage, ClientID};
+use crate::mqtt::message::{BaseMessage, MqttMessageKind, v3};
 use crate::mqtt::message::v3::{MqttMessageV3, ConnackMessage, PublishMessage, PubackMessage, SubscribeMessage, UnsubscribeMessage, UnsubackMessage, DisconnectMessage, SubackMessage, PubrelMessage};
 use crate::mqtt::tools::protocol::MqttQos;
 use crate::{SUBSCRIPT, MACHINE_CONTAINER, MachineID, Machine, MachineStatus};
 use log::{debug, info};
+use crate::http::MachineMessage;
 
 pub async fn match_v3_data(line: &mut Line, base_msg: BaseMessage) -> Option<MqttMessageKind> {
     if let Some(v3) = MqttMessageKind::v3(base_msg) {
@@ -35,11 +36,29 @@ pub async fn match_v3_data(line: &mut Line, base_msg: BaseMessage) -> Option<Mqt
     None
 }
 
+async fn send_qrcdoe(id: String, qrcode_url: String) {
+    let machine_message = MachineMessage::qrcode(id.clone(),qrcode_url);
+    let topic = format!("{}-topic", id);
+    let publish_message = v3::PublishMessage::simple_new_msg(
+        topic,
+        0,
+        serde_json::to_string(&machine_message).unwrap(),
+    );
+    let topic_msg = TopicMessage::ContentV3(ClientID("idreamspace-server".to_string()), publish_message);
+    if let Some(topic) = topic_msg.get_topic() {
+        SUBSCRIPT.broadcast(topic, &topic_msg).await;
+    }
+}
+
 async fn handle_v3(line: &mut Line, kind_opt: Option<&MqttMessageV3>) -> Option<MqttMessageV3> {
     if let Some(kind) = kind_opt {
         match kind {
             MqttMessageV3::Connect(msg) => {
-                MACHINE_CONTAINER.append(MachineID(msg.payload.client_id.clone()), Machine {
+                let machine_id = MachineID(msg.payload.client_id.clone());
+                if let Some(url) = MACHINE_CONTAINER.get_qrcode(&machine_id).await {
+                    send_qrcdoe(msg.payload.client_id.clone(), url).await;
+                }
+                MACHINE_CONTAINER.append(machine_id, Machine {
                     id: msg.payload.client_id.clone(),
                     qrcode_url: "".to_string(),
                     status: MachineStatus::Online,

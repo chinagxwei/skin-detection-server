@@ -43,10 +43,28 @@ enum MachineMessageEvent {
 }
 
 #[derive(Serialize, Deserialize)]
-struct MachineMessage {
+pub struct MachineMessage {
     id: String,
     event: MachineMessageEvent,
     data: String,
+}
+
+impl MachineMessage {
+    pub fn qrcode(id: String, url: String) -> Self {
+        MachineMessage {
+            id,
+            event: MachineMessageEvent::SetQrcodeEvent,
+            data: url,
+        }
+    }
+
+    pub fn login(id: String, openid: String) -> Self {
+        MachineMessage {
+            id,
+            event: MachineMessageEvent::LoginEvent,
+            data: openid,
+        }
+    }
 }
 
 impl From<MachineQrcode> for MachineMessage {

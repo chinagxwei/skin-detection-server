@@ -96,6 +96,13 @@ impl MachineManager {
         }
     }
 
+    pub fn get_qrcode(&self, id: &MachineID) -> Option<String> {
+        if self.map.contains_key(id) {
+            return Option::from(self.map.get(id).unwrap().qrcode_url.clone());
+        }
+        None
+    }
+
     pub fn append(&mut self, id: MachineID, machine: Machine) {
         if self.map.contains_key(&id) {
             let item = self.map.get_mut(&id).expect("append machine error");
@@ -144,6 +151,10 @@ impl MachineContainer {
 
     pub async fn set_qrcode(&self, id: &MachineID, qrcode_url: String) {
         self.container.lock().await.set_qrcode(id, qrcode_url)
+    }
+
+    pub async fn get_qrcode(&self, id: &MachineID) -> Option<String> {
+        return self.container.lock().await.get_qrcode(id)
     }
 }
 
