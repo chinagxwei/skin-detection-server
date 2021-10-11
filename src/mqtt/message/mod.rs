@@ -259,6 +259,12 @@ pub struct PingreqMessage {
     bytes: Vec<u8>,
 }
 
+impl PingreqMessage {
+    pub fn into_vec(self) -> Vec<u8> {
+        self.bytes
+    }
+}
+
 impl MqttMessage for PingreqMessage {
     fn get_message_type(&self) -> TypeKind {
         self.msg_type
