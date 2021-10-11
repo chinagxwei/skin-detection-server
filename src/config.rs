@@ -7,6 +7,7 @@ pub struct Config {
     http: Option<HttpParam>,
     mqtt: Option<MqttParam>,
     preload: Option<PreloadParam>,
+    ping: Option<PingParam>,
 }
 
 impl Config {
@@ -26,8 +27,12 @@ impl Config {
         self.mqtt.as_ref().expect("get mqtt ip is error").port
     }
 
-    pub fn get_preload_url(&self) -> &String {
+    pub fn get_preload_url(&self) -> &str {
         &self.preload.as_ref().expect("get preload url is error").url
+    }
+
+    pub fn get_ping_interval(&self)->u64{
+        self.ping.as_ref().expect("get ping interval is error").interval
     }
 }
 
@@ -46,6 +51,11 @@ pub struct MqttParam {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PreloadParam {
     pub url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PingParam {
+    pub interval: u64,
 }
 
 ///

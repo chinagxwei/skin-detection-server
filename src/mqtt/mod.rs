@@ -1,10 +1,11 @@
 use crate::mqtt::v3_server::{Line, LineMessage};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
-use crate::mqtt::message::MqttMessageKind;
+use crate::mqtt::message::{MqttMessageKind, PingreqMessage};
 use log::{debug, info};
 use std::net::{SocketAddr, Ipv4Addr, SocketAddrV4};
 use std::str::FromStr;
+use tokio::time::{Duration, interval};
 
 use crate::CONFIG;
 
@@ -34,12 +35,18 @@ impl MqttServer {
             tokio::spawn(async move {
                 let mut buf = [0; 1024];
                 let mut line = Line::new();
+                let mut interval = interval(Duration::from_secs(CONFIG.get_ping_interval()));
                 'end_loop: loop {
                     let res = tokio::select! {
                             Ok(n) = socket.read(&mut buf) => {
                                 if n != 0 {
-                                    line.get_sender().send(LineMessage::SocketMessage(buf[0..n].to_vec())).await.expect("send async message error");
+                                    line.get_sender().send(LineMessage::SocketMessage(buf[0..n].to_vec())).await.expect("send async bytes message error");
                                 }
+                                None
+                            },
+                            _ = interval.tick() => {
+                                let msg = PingreqMessage::default();
+                                line.get_sender().send(LineMessage::PingMessage(msg.into_vec())).await.expect("send async ping message error");
                                 None
                             },
                             kind = line.recv() => kind,
@@ -70,8 +77,8 @@ impl MqttServer {
 pub async fn mqtt_server() {
     let socket = SocketAddrV4::new(
         Ipv4Addr::from_str(CONFIG.get_mqtt_ip()).unwrap(),
-        CONFIG.get_mqtt_port()
+        CONFIG.get_mqtt_port(),
     );
-    let server = MqttServer::new( SocketAddr::from(socket));
+    let server = MqttServer::new(SocketAddr::from(socket));
     server.start().await;
 }

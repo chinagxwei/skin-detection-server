@@ -202,6 +202,7 @@ impl Topic {
 pub enum LineMessage {
     SocketMessage(Vec<u8>),
     SubscriptionMessage(TopicMessage),
+    PingMessage(Vec<u8>),
 }
 
 pub struct Line {
@@ -291,7 +292,8 @@ impl Line {
             Some(msg) => {
                 match msg {
                     LineMessage::SocketMessage(msg) => self.handle_socket_message(msg).await,
-                    LineMessage::SubscriptionMessage(msg) => self.handle_subscription_message(msg)
+                    LineMessage::SubscriptionMessage(msg) => self.handle_subscription_message(msg),
+                    LineMessage::PingMessage(msg) => Some(MqttMessageKind::Response(msg))
                 }
             }
         }
