@@ -59,6 +59,10 @@ impl MqttBytesMessage for ConnectMessage {
     fn as_bytes(&self) -> &[u8] {
         self.bytes.as_ref().unwrap()
     }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -79,6 +83,10 @@ impl MqttMessage for ConnackMessage {
 impl MqttBytesMessage for ConnackMessage {
     fn as_bytes(&self) -> &[u8] {
         self.bytes.as_slice()
+    }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes
     }
 }
 
@@ -138,6 +146,10 @@ impl MqttBytesMessage for PublishMessage {
     fn as_bytes(&self) -> &[u8] {
         self.bytes.as_ref().unwrap()
     }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
+    }
 }
 
 impl From<BaseMessage> for PublishMessage {
@@ -169,6 +181,10 @@ impl MqttBytesMessage for SubscribeMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
     }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -190,6 +206,10 @@ impl MqttBytesMessage for UnsubscribeMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
     }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -210,6 +230,10 @@ impl MqttMessage for SubackMessage {
 impl MqttBytesMessage for SubackMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
+    }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
     }
 }
 
@@ -256,6 +280,10 @@ impl MqttMessage for UnsubackMessage {
 impl MqttBytesMessage for UnsubackMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
+    }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
     }
 }
 
@@ -316,6 +344,10 @@ impl MqttBytesMessage for DisconnectMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_slice()
     }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes
+    }
 }
 
 impl Default for DisconnectMessage {
@@ -348,6 +380,10 @@ impl MqttMessage for AuthMessage {
 impl MqttBytesMessage for AuthMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_slice()
+    }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes
     }
 }
 
@@ -402,6 +438,10 @@ impl MqttMessage for CommonPayloadMessage {
 impl MqttBytesMessage for CommonPayloadMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
+    }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
     }
 }
 

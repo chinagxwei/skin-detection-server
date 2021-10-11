@@ -164,6 +164,10 @@ impl MqttBytesMessage for ConnectMessage {
     fn as_bytes(&self) -> &[u8] {
         self.bytes.as_ref().unwrap()
     }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
+    }
 }
 
 impl From<BaseMessage> for ConnectMessage {
@@ -189,6 +193,10 @@ impl MqttMessage for ConnackMessage {
 impl MqttBytesMessage for ConnackMessage {
     fn as_bytes(&self) -> &[u8] {
         self.bytes.as_slice()
+    }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes
     }
 }
 
@@ -239,6 +247,10 @@ impl MqttBytesMessage for SubscribeMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
     }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
+    }
 }
 
 impl SubscribeMessage {
@@ -272,6 +284,10 @@ impl MqttMessage for SubackMessage {
 impl MqttBytesMessage for SubackMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
+    }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
     }
 }
 
@@ -329,6 +345,10 @@ impl MqttBytesMessage for UnsubscribeMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
     }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
+    }
 }
 
 impl UnsubscribeMessage {
@@ -360,6 +380,10 @@ impl MqttMessage for UnsubackMessage {
 impl MqttBytesMessage for UnsubackMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
+    }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
     }
 }
 
@@ -402,6 +426,10 @@ impl MqttMessage for PublishMessage {
 impl MqttBytesMessage for PublishMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
+    }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
     }
 }
 
@@ -456,6 +484,10 @@ impl MqttBytesMessage for PubackMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
     }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
+    }
 }
 
 impl PubackMessage {
@@ -492,6 +524,10 @@ impl MqttMessage for PubrecMessage {
 impl MqttBytesMessage for PubrecMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
+    }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
     }
 }
 
@@ -530,6 +566,10 @@ impl MqttBytesMessage for PubrelMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
     }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
+    }
 }
 
 impl PubrelMessage {
@@ -567,6 +607,10 @@ impl MqttBytesMessage for PubcompMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_ref().unwrap()
     }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes.unwrap()
+    }
 }
 
 impl PubcompMessage {
@@ -602,6 +646,10 @@ impl MqttMessage for DisconnectMessage {
 impl MqttBytesMessage for DisconnectMessage {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes.as_slice()
+    }
+
+    fn into_vec(self) -> Vec<u8> {
+        self.bytes
     }
 }
 
